@@ -1,0 +1,32 @@
+{
+  "name": "learning-securing-wepapi-with-oauth-and-json-webtokens",
+  "version": "1.0.0",
+  "description": "- oAuth\r - Json Web Tokens\r - Http request interception",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knoerregaard/Learning-Securing-Wepapi-with-oAuth-and-JSON-webtokens.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/knoerregaard/Learning-Securing-Wepapi-with-oAuth-and-JSON-webtokens/issues"
+  },
+  "homepage": "https://github.com/knoerregaard/Learning-Securing-Wepapi-with-oAuth-and-JSON-webtokens#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "google-auth-library": "^4.0.0",
+    "googleapis": "^39.2.0",
+    "http": "0.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.2.3",
+    "opn": "^6.0.0",
+    "request": "^2.88.0",
+    "server-destroy": "^1.0.1",
+    "url": "^0.11.0"
+  }
+}
