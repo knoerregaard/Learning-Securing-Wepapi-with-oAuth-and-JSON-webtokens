@@ -1,34 +1,33 @@
 const express = require('express');
-const request = require('request');
-const fs   = require('fs');
-const jwt  = require('jsonwebtoken');
+const request = require('request')
 const app = express()
 const cors = require('cors');
-const {google} = require('googleapis');
-
+const {OAuth2Client} = require('google-auth-library');  //Newer library
 
 // Download your OAuth2 configuration from the Google
 const keys = require('./../oauth2.keys.json');
 
-const oauth2Client = new google.auth.OAuth2(
+const oauth2Client = new OAuth2Client(
     keys.web.client_id,
     keys.web.client_secret,
     keys.web.redirect_uris[1]
-  );
+);
 const scopes = [
     'https://www.googleapis.com/auth/userinfo.profile'
 ];
-const url = oauth2Client.generateAuthUrl({
+ 
+const authorizeUrl = oauth2Client.generateAuthUrl({
     scope: scopes,
     // 'online' (default) or 'offline' (gets refresh_token)
     access_type: 'offline',
+
+}); 
+
+function verifyToken(req, res, next){
   
-  });
-
-
+}
 // process.env.PORT is relevant when you use Heroku as a host.
-const PORT = 3000 |  process.env.PORT;
-
+const PORT = 3000 | process.env.PORT;
 
 //---- Setting up middleware START ----//
 
@@ -50,42 +49,27 @@ app.use(express.urlencoded({
 //express.json() is a method inbuilt in express to recognize the incoming Request Object as a JSON Object
 app.use(express.json());
 
-//---- Setting up middleware END ----//
-
-
 //---- Setting up requesthandlers START ----//
-app.use('/static', express.static('public'))
 
-app.get('/login', (req, res)=>{
-    res.send(`
-        <h2>Login</h2>
-        <a href="${url}">login</a>
-    `)
-});
-
-app.use('/google/callback', (req, res)=>{
+app.get('/google-login', (req, res) => {
+})
+app.get('/google/callback', (req, res) => {
+    //Google will return an object that contains access_tokens amongst others
+    //The accesstoken will be send back to google. Google will verify the accesstoken, 
+    //and send back the userprofile.
+    
     oauth2Client.getToken(req.query.code).then((result)=>{
+        console.log(result);
 
-        oauth2Client.setCredentials({
-            access_token: result.tokens.access_token       
-        });
+    }).catch((err)=>{
+        console.log(err);
+    })  
+    res.send("ok")
+})
 
-        let prom = new Promise((resolve, reject) => {
-        google.oauth2('v2').userinfo.get({
-            auth: oauth2Client
-        }, (err, data) => (err ? reject(err) : resolve(data)))});
+app.get('/privat',(req, res)=>{
 
-        prom.then((result)=>{
-            console.log(result);
-            
-        })
-    })
-
-    //Send the code back to Google to return information about the person.
-    res.send(`Perfekt`)
-});
-
-
+})
 //---- Setting up requesthandlers END ----//
 
 //The app is instantiated and ready to go

@@ -1,82 +1,101 @@
-const {OAuth2Client} = require('google-auth-library');
-const http = require('http');
-const url = require('url');
-const opn = require('opn');
-const destroyer = require('server-destroy');
- 
+const express = require('express');
+const request = require('request')
+const app = express()
+const cors = require('cors');
+const {OAuth2Client} = require('google-auth-library');  //Newer library
+
 // Download your OAuth2 configuration from the Google
-const keys = require('./oauth2.keys.json');
+const keys = require('./../oauth2.keys.json');
+
+const oauth2Client = new OAuth2Client(
+    keys.web.client_id,
+    keys.web.client_secret,
+    keys.web.redirect_uris[1]
+);
+const scopes = [
+    'https://www.googleapis.com/auth/userinfo.profile'
+];
  
-/**
- * Start by acquiring a pre-authenticated oAuth2 client.
- */
-async function main() {
-  const oAuth2Client = await getAuthenticatedClient();
-  // Make a simple request to the People API using our pre-authenticated client. The `request()` method
-  // takes an GaxiosOptions object.  Visit https://github.com/JustinBeckwith/gaxios.
-  const url = 'https://people.googleapis.com/v1/people/me?personFields=names';
-  const res = await oAuth2Client.request({url});
-  console.log(res.data);
- 
-  // After acquiring an access_token, you may want to check on the audience, expiration,
-  // or original scopes requested.  You can do that with the `getTokenInfo` method.
-  const tokenInfo = await oAuth2Client.getTokenInfo(
-    oAuth2Client.credentials.access_token
-  );
-  console.log(tokenInfo);
-}
- 
-/**
- * Create a new OAuth2Client, and go through the OAuth2 content
- * workflow.  Return the full client to the callback.
- */
-function getAuthenticatedClient() {
-  return new Promise((resolve, reject) => {
-    // create an oAuth client to authorize the API call.  Secrets are kept in a `keys.json` file,
-    // which should be downloaded from the Google Developers Console.
-    const oAuth2Client = new OAuth2Client(
-      keys.web.client_id,
-      keys.web.client_secret,
-      keys.web.redirect_uris[0]
-    );
- 
-    // Generate the url that will be used for the consent dialog.
-    const authorizeUrl = oAuth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: 'https://www.googleapis.com/auth/userinfo.profile',
-    });
- 
-    // Open an http server to accept the oauth callback. In this simple example, the
-    // only request to our webserver is to /oauth2callback?code=<code>
-    const server = http
-      .createServer(async (req, res) => {
-        try {
-          if (req.url.indexOf('/oauth2callback') > -1) {
-            // acquire the code from the querystring, and close the web server.
-            const qs = new url.URL(req.url, 'http://localhost:3000')
-              .searchParams;
-            const code = qs.get('code');
-            console.log(`Code is ${code}`);
-            res.end('Authentication successful! Please return to the console.');
-            server.destroy();
- 
-            // Now that we have the code, use that to acquire tokens.
-            const r = await oAuth2Client.getToken(code);
-            // Make sure to set the credentials on the OAuth2 client.
-            oAuth2Client.setCredentials(r.tokens);
-            console.info('Tokens acquired.');
-            resolve(oAuth2Client);
-          }
-        } catch (e) {
-          reject(e);
-        }
-      })
-      .listen(3000, () => {
-        // open the browser to the authorize url to start the workflow
-        opn(authorizeUrl, {wait: false}).then(cp => cp.unref());
+const authorizeUrl = oauth2Client.generateAuthUrl({
+    scope: scopes,
+    // 'online' (default) or 'offline' (gets refresh_token)
+    access_type: 'offline',
+
+}); 
+
+function verifyToken(req, res, next){
+    // var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    var token = req.body.token;
+    console.log(req.body);
+    
+    // decode token
+    if (token) {
+        // verifies secret and checks exp
+        oauth2Client.verifyIdToken({idToken : req.body.token}).then((result)=>{
+            console.log(result);
+            res.send("ok");
+            next();
+        })
+    } else {
+      // if there is no token
+      // return an error
+      return res.status(403).send({ 
+          success: false, 
+          message: 'No token provided.' 
       });
-    destroyer(server);
-  });
+    }
 }
- 
-main().catch(console.error);
+// process.env.PORT is relevant when you use Heroku as a host.
+const PORT = 3000 | process.env.PORT;
+
+//---- Setting up middleware START ----//
+
+//Serve static files folder
+app.use(express.static('./../public'))
+
+// Whenever you make cross-domain request you will need to handle cores setup.
+// You have to whitelist clients ip adresses, or allow certain ip addresses to make 
+// reuqest to your server. Below I am allowing every request to access my server.
+app.use(cors({
+    'Access-Control-Allow-Origin': '*'
+}));
+
+// express.urlencoded() is a method built in express to recognize the incoming Request Object as strings or arrays.
+app.use(express.urlencoded({
+    extended: true
+}));
+
+//express.json() is a method inbuilt in express to recognize the incoming Request Object as a JSON Object
+app.use(express.json());
+
+//---- Setting up requesthandlers START ----//
+
+app.get('/google-login', (req, res) => {
+    res.send(`
+        <h2>Login</h2>
+        <a href="${authorizeUrl}">login</a>
+    `)
+})
+app.get('/google/callback', (req, res) => {
+    //Google will return an object that contains access_tokens amongst others
+    //The accesstoken will be send back to google. Google will verify the accesstoken, 
+    //and send back the userprofile.
+    
+    oauth2Client.getToken(req.query.code).then((result)=>{
+        console.log(result);
+        // oauth2Client.verifyIdToken({idToken : result.tokens.id_token}).then((result)=>{
+        //     console.log(result);
+        // })
+    }).catch((err)=>{
+        console.log(err);
+    })  
+    res.send("ok")
+})
+
+app.get('/privat', verifyToken ,(req, res)=>{
+    res.send("private information")
+})
+//---- Setting up requesthandlers END ----//
+
+//The app is instantiated and ready to go
+app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
