@@ -24,7 +24,14 @@ const authorizeUrl = oauth2Client.generateAuthUrl({
 }); 
 
 function verifyToken(req, res, next){
-  
+    console.log(req.headers.authorization);
+    oauth2Client.verifyIdToken({idToken : req.body.token }).then((result)=>{
+        if(token){
+            next();
+        }else{
+            res.send("ej tilgængelig");
+        }
+    })
 }
 // process.env.PORT is relevant when you use Heroku as a host.
 const PORT = 3000 | process.env.PORT;
@@ -51,8 +58,12 @@ app.use(express.json());
 
 //---- Setting up requesthandlers START ----//
 
-app.get('/google-login', (req, res) => {
-})
+app.get('/google-login', (req, res)=>{
+    res.send(`
+        <h2>Login</h2>
+        <a href="${url}">login</a>
+    `)
+});
 app.get('/google/callback', (req, res) => {
     //Google will return an object that contains access_tokens amongst others
     //The accesstoken will be send back to google. Google will verify the accesstoken, 
@@ -60,15 +71,15 @@ app.get('/google/callback', (req, res) => {
     
     oauth2Client.getToken(req.query.code).then((result)=>{
         console.log(result);
-
+        res.send(result);
     }).catch((err)=>{
         console.log(err);
     })  
     res.send("ok")
 })
 
-app.get('/privat',(req, res)=>{
-
+app.get('/privat', verifyToken ,(req, res)=>{
+    res.send("hello from private")
 })
 //---- Setting up requesthandlers END ----//
 
