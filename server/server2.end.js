@@ -71,11 +71,13 @@ app.use(express.json());
 //---- Setting up requesthandlers START ----//
 
 app.get('/google-login', (req, res) => {
+
     res.send(`
         <h2>Login</h2>
         <a href="${authorizeUrl}">login</a>
     `)
 })
+
 app.get('/google/callback', (req, res) => {
     //Google will return an object that contains access_tokens amongst others
     //The accesstoken will be send back to google. Google will verify the accesstoken, 
@@ -83,13 +85,15 @@ app.get('/google/callback', (req, res) => {
     
     oauth2Client.getToken(req.query.code).then((result)=>{
         console.log(result);
+
         // oauth2Client.verifyIdToken({idToken : result.tokens.id_token}).then((result)=>{
         //     console.log(result);
         // })
+res.send(result)
+        // res.redirect(`http://localhost:4200/?token=${result.tokens.id_token}`);
     }).catch((err)=>{
         console.log(err);
-    })  
-    res.send("ok")
+    })
 })
 
 app.get('/privat', verifyToken ,(req, res)=>{
