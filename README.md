@@ -13,3 +13,11 @@
 - Terminologies
 - openID Connect
 - Test with Postman and Google
+
+#oAuth
+## Sources
+- https://oauth.net/
+"oAuth is an open protocol to allow  secure authorization in a simple and standard method from web, mobile, and desktop applications"
+
+It is very important to distinguish between between authorization and autorization. 
+Authorization is about granding roles access to specific ressources. Authentication is about verifying 

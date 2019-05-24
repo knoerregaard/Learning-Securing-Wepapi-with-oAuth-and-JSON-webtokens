@@ -89,7 +89,7 @@ app.get('/google/callback', (req, res) => {
         // oauth2Client.verifyIdToken({idToken : result.tokens.id_token}).then((result)=>{
         //     console.log(result);
         // })
-res.send(result)
+        res.send(result)
         // res.redirect(`http://localhost:4200/?token=${result.tokens.id_token}`);
     }).catch((err)=>{
         console.log(err);
