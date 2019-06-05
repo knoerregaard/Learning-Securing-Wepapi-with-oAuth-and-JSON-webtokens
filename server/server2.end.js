@@ -19,8 +19,7 @@ const scopes = [
 const authorizeUrl = oauth2Client.generateAuthUrl({
     scope: scopes,
     // 'online' (default) or 'offline' (gets refresh_token)
-    access_type: 'offline',
-
+    access_type: 'offline'
 }); 
 
 function verifyToken(req, res, next){
