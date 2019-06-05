@@ -17,7 +17,13 @@
 #oAuth
 ## Sources
 - https://oauth.net/
-"oAuth is an open protocol to allow  secure authorization in a simple and standard method from web, mobile, and desktop applications"
+"oAuth is an open protocol to allow secure authorization in a simple and standard method from web, mobile, and desktop applications"
 
 It is very important to distinguish between between authorization and autorization. 
 Authorization is about granding roles access to specific ressources. Authentication is about verifying that a person is who he or she is saying that he or she is.
+
+## oAuth flow
+
+![alt text](https://raw.githubusercontent.com/knoerregaard/Learning-Securing-Wepapi-with-oAuth-and-JSON-webtokens/master/public/oauthFlow.PNG)
+
+
