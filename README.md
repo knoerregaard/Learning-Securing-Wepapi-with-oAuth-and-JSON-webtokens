@@ -1,6 +1,6 @@
 # Learning-Securing-Wepapi-with-oAuth-and-JSON-webtokens
 
-## sources
+## Sources
 - https://developers.google.com/identity/protocols/OAuth2
 - http://www.oauth.net
 - https://openid.net/connect/
@@ -21,8 +21,6 @@
 - Test with Postman and Google
 
 #oAuth
-## Sources
-- https://oauth.net/
 "oAuth is an open protocol to allow secure authorization in a simple and standard method from web, mobile, and desktop applications"
 
 It is very important to distinguish between between authorization and autorization. 
